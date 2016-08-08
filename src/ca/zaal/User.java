@@ -1,9 +1,9 @@
 package ca.zaal;
 
-        import java.io.BufferedReader;
-        import java.util.ArrayList;
-        import java.util.regex.Matcher;
-        import java.util.regex.Pattern;
+import java.io.BufferedReader;
+import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by czaal on 8/4/2016.
@@ -12,15 +12,16 @@ public class User {
     String name;
     String[] projects;
     float[] hours;
+    int numProjects;
 
-    public User() {
+    protected User() {
     }
 
-    public User(String name){
+    protected User(String name) {
         setName(name);
     }
 
-    public User(String name, String[] project, float[] hours) {
+    protected User(String name, String[] project, float[] hours) {
         setName(name);
         setProjects(project);
         setHours(hours);
@@ -50,22 +51,35 @@ public class User {
         this.hours = hours;
     }
 
+    /**
+     * This function will split an input string from a CSV file and we can check it.
+     * @param inputString
+     * @return String the user's name as stripped out of the string. null if not a username
+     */
     public String getUsername(String inputString) {
         String[] items = null;
 
         items = inputString.split(",");
         //System.out.println("Element 0 of the items array is "+ items[0]);
 
-        if(items[0].length() < 4)
+        if (items[0].compareToIgnoreCase("Total time") == 0 || items[0].length() < 0)
             return null;
 
         return items[0];
     }
 
+    /**
+     * This is going to be a weird function. I want to use it to identify if a new username is in the line. If so
+     * I want to return null, else we're going to pick up the project and send it back to the calling function.
+     * @param line will there be something
+     * @return null if a username; null if project number isn't found
+     */
     public String getProject(String line) {
         String[] items = null;
         String matchedString = null, temp = null;
-        int projectNumber = 0;
+
+        if(getUsername(line) != null)
+            return null;
 
         items = line.split(",");
 
@@ -83,28 +97,45 @@ public class User {
             m = pattern.matcher(line);
             m.find();
             temp = m.group();
-            matchedString += ","+temp;
-            System.out.println("Not Found");
+            matchedString += "," + temp;
 
         }
-        if(matchedString == null)
+        if (matchedString == null)
             return null;
 
         return matchedString;
     }
 
-    public Object processLine(String line){
-        String username;
-        String projectNumber;
+    /**
+     * This method will process an input line and check to see if it's either a User name, a project number or
+     * something else.
+     * @param line String that will be checked for different values.
+     * @return String containing the values to be passed back to calling function
+     */
+    public int processLine(String line, User thisUser) {
+        String tempString;
 
-        username = getUsername(line);
-        if(username != null && !username.isEmpty())
-            return username;
+        tempString = getUsername(line);
+        if (tempString != null && !tempString.isEmpty()) {
+            thisUser.setName(tempString);
+            return 1;
+        }
 
-        projectNumber = getProject(line);
-        if(projectNumber != null && !projectNumber.isEmpty())
-            return projectNumber;
+        tempString = getProject(line);
+        if (tempString != null && !tempString.isEmpty())
+            return 2;
 
-        return null;
+        return -1;
+    }
+
+    public boolean isName(String line){
+        String[] items = null;
+
+        items = line.split(",");
+
+        if (items[0].length() > 4)
+            return true;
+
+        return false;
     }
 }

@@ -1,12 +1,37 @@
 package ca.zaal;
 
-        import static java.lang.System.*;
+import static java.lang.System.*;
 
-        import java.lang.*;
-        import java.io.*;
-        import java.util.ArrayList;
-        import java.util.regex.Matcher;
-        import java.util.regex.Pattern;
+import java.lang.*;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+/**
+ *
+ While we continue to receive lines from the opened csv file
+    Check what kind of entry it is (Username, Project or other)
+        If it’s a username
+            If no current user object exists
+                Create a User Object and store the name in it
+            Else
+                Save current user object to the User Objects arraylist
+                Instantiate a User Object and store the name in it
+        If it’s a project( with project Number)
+            Add the project number and the number of hours to the User Objects projects and hours arrays. Use the projectNum var for the proper index.
+        If it’s Other
+            Discard
+
+ Close CSV file
+
+ Process User Objects Arraylist
+    For each User object
+        Get each object from the Projects Arraylist
+        Create a string formatted for the ARIS TS application and write to the out file
+ Close out file
+
+ */
 
 public class Main {
 
@@ -16,54 +41,41 @@ public class Main {
             out.println("USAGE: java -jar RedmineFormatter <filename>");
             exit(-99);
         }
-
+        out.println("Application starting...");
         //open the input file
         String fileName = args[0];
-        out.println("Application starting...");
+
         String line;
-        Object retValue;
-        boolean found = false;
+        String retValue;
+        int retType;
+        boolean newName = false;
         String temp = null;
         float[] projectNum = null;
         int projectCount = 0;
         User thisUser = new User();
         ArrayList<User> UserList = new ArrayList<User>();
         ArrayList<Integer> ProjectsList = new ArrayList<Integer>();
+        ArrayList<String> recordList = new ArrayList<>();
 
         try {
             FileReader fileReader = new FileReader(fileName);
             BufferedReader bufferedReader = new BufferedReader(fileReader);
 
             while ((line = bufferedReader.readLine()) != null) {
-                retValue = thisUser.processLine(line);
-                if (retValue != null && retValue.getClass() == String.class && !"".equals(retValue)) {
-                    thisUser.setName((String)retValue);
-                    continue;
-                }
-                else if(retValue != null&& retValue.getClass() == Integer.class) {
-                    ProjectsList.add((Integer)retValue);
-                    System.out.println("Project Num is " + projectNum.toString());
+                System.out.println(line);
+                retType = thisUser.processLine(line, thisUser);
+                if(retType == 1) { // we got a username
 
-                    continue;
                 }
-                else System.out.println("Must be an empty line or I don't know what I'll have working through!!!");
+                else if(retType == 2){// we got a project
+                }
+
             }
 
             bufferedReader.close();
-            fileReader.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        //store in an arrayList
-        //skip first line
-        //second line will contain Username
-        //store username
-        //read other lines until another Username is encountered in column one
-        //parse the entries from first username using the account codes that should be found in each project name
-        //using regex to find patterns (Foapal account codes should be used for this)
-        //if no matches, add to 'default' time bucket for user
-        //save errors where there are no matches
-        //write out a new CSV file based on format required for Access Timesheet
     }
 
     /**
