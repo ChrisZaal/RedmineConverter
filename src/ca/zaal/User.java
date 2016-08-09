@@ -69,17 +69,21 @@ public class User {
     }
 
     /**
-     * This is going to be a weird function. I want to use it to identify if a new username is in the line. If so
-     * I want to return null, else we're going to pick up the project and send it back to the calling function.
-     * @param line will there be something
-     * @return null if a username; null if project number isn't found
+     * This method will process an input line and check to see if it's either a User name, a project number or
+     * something else.
+     * @param line String that will be checked for different values.
+     * @return String containing the values to be passed back to calling function
      */
-    public String getProject(String line) {
-        String[] items = null;
-        String matchedString = null, temp = null;
+    public int processLine(String line, User thisUser) {
+        String tempString, temp;
+        String[] items;
+        StringBuilder sb = new StringBuilder(15);
 
-        if(getUsername(line) != null)
-            return null;
+        tempString = getUsername(line);
+        if (tempString != null && !tempString.isEmpty()) {
+            thisUser.setName(tempString);
+            return 1;
+        }
 
         items = line.split(",");
 
@@ -90,52 +94,31 @@ public class User {
         if (m.find()) {
             System.out.println("True!");
             //matchedString = line.substring(m.start(), m.end());
-            matchedString = m.group(1);
-            System.out.println("Matched String is " + matchedString);
+            sb.append(m.group(1));
+            System.out.println("Matched String is " + tempString);
             pattern = Pattern.compile("[0-9]{2,3}(\\.[0-9]{1,2})");
             m.reset();
             m = pattern.matcher(line);
             m.find();
             temp = m.group();
-            matchedString += "," + temp;
+            sb.append("," + temp);
 
         }
-        if (matchedString == null)
-            return null;
-
-        return matchedString;
-    }
-
-    /**
-     * This method will process an input line and check to see if it's either a User name, a project number or
-     * something else.
-     * @param line String that will be checked for different values.
-     * @return String containing the values to be passed back to calling function
-     */
-    public int processLine(String line, User thisUser) {
-        String tempString;
-
-        tempString = getUsername(line);
-        if (tempString != null && !tempString.isEmpty()) {
-            thisUser.setName(tempString);
-            return 1;
-        }
-
-        tempString = getProject(line);
         if (tempString != null && !tempString.isEmpty())
             return 2;
 
         return -1;
     }
 
-    public boolean isName(String line){
-        String[] items = null;
+    /**
+     * This method will determine the type of record that is being
+     * @param line string containing data to be searched through
+     * @return int 1 for username, 2 for project, 3 for anything else that will probably be discarded.
+     */
+    public int lineType(String line){
+        int typeOfLine = 0;
 
-        items = line.split(",");
 
-        if (items[0].length() > 4)
-            return true;
-
-        return false;
+        return typeOfLine;
     }
 }
